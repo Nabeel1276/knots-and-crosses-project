@@ -1,129 +1,78 @@
+// Define the gridSections, currentPlayer, turnDisplay, and winningConditions as constants
+let gridSections = document.querySelectorAll('.grid-section');
+let currentPlayer = 'X'; 
+let turnDisplay = document.querySelector('.turnDisplay');
 
-// let cart = [];
-// let tShirts = []; // Define tShirts globally
+// Function to initialize the restart button and add event listener
+const initialiseRestartButton = () => {
+    const button = document.querySelector('.restartButton');
+    button.addEventListener('click', resetBoard);
+    return button;
+};
 
-// function fetchDataAndUpdateUI() {
-//     const headers = new Headers({
-//         'Authorization': 'Basic ' + btoa('user:password')
-//     });
+// Define winning conditions
+let winningConditions = [
+    [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+    [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+    [0, 4, 8], [2, 4, 6]             // Diagonals
+];
 
-//     fetch('http://127.0.0.1:8081/TShirts', { headers })
-//         .then(response => response.json())
-//         .then(data => {
-//             tShirts = data; // Assign fetched data to tShirts
-//             renderTShirts();
-//         })
-//         .catch(error => console.error('Error fetching data:', error));
-// }
-
-// function renderTShirts() {
-//     const tShirtsContainer = document.getElementById('tshirt-list');
-//     tShirtsContainer.innerHTML = ''; // Clear existing content
-
-//     tShirts.forEach(tShirt => {
-//         const tShirtElement = document.createElement('div');
-//         tShirtElement.classList.add('tshirt'); // Optional: Add a class for styling
-
-//         tShirtElement.innerHTML = `
-//             <p>T-Shirt ID: ${tShirt.tShirtId}</p>
-//             <p>Size: ${tShirt.size}</p>
-//             <p>Kit: ${tShirt.kit}</p>
-//             <p>Number: ${tShirt.number}</p>
-//             <p>Condition: ${tShirt.condition}</p>
-//             <p>Price: £${tShirt.price}</p>
-//             <button onclick="addToCart(${tShirt.tShirtId})">Add to Cart</button>
-//         `;
-
-//         tShirtsContainer.appendChild(tShirtElement);
-//     });
-// }
-
-// function addToCart(tShirtId) {
-//     // Find the selected T-shirt by its ID
-//     const selectedTShirt = tShirts.find(tShirt => tShirt.tShirtId === tShirtId);
-
-//     // Check if the item is already in the cart
-//     const alreadyInCart = cart.some(item => item.tShirtId === tShirtId);
-
-//     if (alreadyInCart) {
-//         alert('This item is already in the cart!');
-//     } else {
-//         // Add the selected T-shirt to the cart array
-//         cart.push(selectedTShirt);
-//         alert('T-Shirt added to cart!');
-//     }
-// }
-
-// function goToCart() {
-//     // Store the cart in localStorage to be retrieved on the cart page
-//     localStorage.setItem('cart', JSON.stringify(cart));
-//     // Navigate to the cart page
-//     window.location.href = 'cart.html';
-// }
-
-// document.addEventListener('DOMContentLoaded', fetchDataAndUpdateUI);
-
-// Define global variables
-let cart = [];
-let tShirts = [];
-
-// Function to fetch data and update UI
-async function fetchDataAndUpdateUI() {
-    try {
-        const headers = new Headers({
-            'Authorization': 'Basic ' + btoa('user:password')
-        });
-
-        const response = await fetch('http://127.0.0.1:8081/TShirts', { headers });
-        const data = await response.json();
-        tShirts = data;
-        renderTShirts();
-    } catch (error) {
-        console.error('Error fetching data:', error);
-    }
-}
-
-// Function to render T-shirts
-function renderTShirts() {
-    const tShirtsContainer = document.getElementById('tshirt-list');
-    tShirtsContainer.innerHTML = '';
-
-    tShirts.forEach(tShirt => {
-        const tShirtElement = document.createElement('div');
-        tShirtElement.classList.add('tshirt');
-
-        tShirtElement.innerHTML = `
-            <p>T-Shirt ID: ${tShirt.tShirtId}</p>
-            <p>Size: ${tShirt.size}</p>
-            <p>Kit: ${tShirt.kit}</p>
-            <p>Number: ${tShirt.number}</p>
-            <p>Condition: ${tShirt.condition}</p>
-            <p>Price: £${tShirt.price}</p>
-            <button onclick="addToCart(${tShirt.tShirtId})">Add to Cart</button>
-        `;
-
-        tShirtsContainer.appendChild(tShirtElement);
-    });
-}
-
-// Function to add item to cart
-function addToCart(tShirtId) {
-    const selectedTShirt = tShirts.find(tShirt => tShirt.tShirtId === tShirtId);
-    const alreadyInCart = cart.some(item => item.tShirtId === tShirtId);
-
-    if (alreadyInCart) {
-        alert('This item is already in the cart!');
+// Function to switch the player
+const switchPlayer = () => {
+    if (currentPlayer === 'X') {
+        currentPlayer = 'O';
     } else {
-        cart.push(selectedTShirt);
-        alert('T-Shirt added to cart!');
+        currentPlayer = 'X';
     }
-}
+    turnDisplay.textContent = `Player ${currentPlayer}'s Turn`;
+};
 
-// Function to navigate to cart page
-function goToCart() {
-    localStorage.setItem('cart', JSON.stringify(cart));
-    window.location.href = 'cart.html';
-}
 
-// Event listener for DOMContentLoaded
-document.addEventListener('DOMContentLoaded', fetchDataAndUpdateUI);
+
+// Function to check if the game has ended
+const checkGameEnd = () => {
+    for (let i = 0; i < winningConditions.length; i++) {
+        const combination = winningConditions[i];
+        const symbols = combination.map(index => gridSections[index].textContent);
+        const firstSymbol = symbols[0];
+        if (firstSymbol && symbols.every(symbol => symbol === firstSymbol)) {
+            return true; // Winning combination found
+        }
+    }
+    return false; // No winning combination found
+};
+
+// Function to reset the board
+let resetBoard = () => {
+    gridSections.forEach(section => {
+        section.textContent = '';
+    });
+    currentPlayer = 'X';
+    turnDisplay.textContent = `Player ${currentPlayer}'s Turn`;
+};
+
+// Function to reset the entire game
+let resetGame = () => {
+    resetBoard();
+};
+
+// Function to handle a click on a grid section
+const handleSectionClick = (e) => {
+    const gridSection = e.target;
+
+    if (!gridSection.textContent) {
+        gridSection.textContent = currentPlayer;
+
+        if (checkGameEnd()) {
+            alert(`Game over! Player ${currentPlayer} wins!`);
+            resetGame();
+        } else {
+            switchPlayer();
+        }
+    }
+};
+
+// Add event listeners to grid sections
+gridSections.forEach(section => {
+    section.addEventListener('click', handleSectionClick);
+});
